@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 5000;
 
 // --- UPDATED MIDDLEWARE ---
 app.use(cors({
-    origin: "https://cinestream-six-psi.vercel.app", 
+    origin: ["https://cinestream-six-psi.vercel.app", "http://localhost:5173", "http://localhost:3000"], 
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
 }));

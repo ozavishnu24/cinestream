@@ -15,7 +15,7 @@ const MovieDetails = () => {
     const fetchMovieData = async () => {
       try {
         // 1. Fetch Movie Details
-        const res = await axios.get(`http://localhost:5000/api/movies/${id}`);
+        const res = await axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/movies/${id}`);
         setMovie(res.data);
 
         // 2. Check if movie is already in user's watchlist (if logged in)

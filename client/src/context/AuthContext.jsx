@@ -7,7 +7,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token"));
 
-  // This uses the Vercel variable or defaults to local for your VS Code testing
+  
   const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000",
   });
