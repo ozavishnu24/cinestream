@@ -1,4 +1,3 @@
-// server/index.js
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -13,28 +12,24 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors());
+// --- UPDATED MIDDLEWARE ---
+app.use(cors({
+    origin: "https://cinestream-six-psi.vercel.app", 
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
+}));
 app.use(express.json());
 
 // Database Connection
 connectDB();
 
 // --- ROUTES ---
-
-// 1. Test Route
 app.get("/", (req, res) => res.send("CineStream API is running..."));
-
-// 2. Movie Routes (List, Details, Search)
 app.use("/api/movies", movieRoutes);
-
-// 3. Auth Routes (Register, Login)
 app.use("/api/auth", authRoutes);
-
-// 4. User Routes (Watchlist Add/Remove)
 app.use("/api/user", userRoutes);
 
-// 5. Chatbot Route (With Smart Fallback)
+// Chatbot Route
 app.post("/api/chat", async (req, res) => {
   const { prompt } = req.body;
   const apiKey = process.env.GEMINI_API_KEY;
@@ -44,9 +39,7 @@ app.post("/api/chat", async (req, res) => {
   }
 
   try {
-    // Attempt to call Gemini AI
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${apiKey}`;
-    
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -57,19 +50,15 @@ app.post("/api/chat", async (req, res) => {
 
     const data = await response.json();
 
-    // If Gemini works, send the reply
     if (data.candidates && data.candidates[0].content.parts[0].text) {
       const text = data.candidates[0].content.parts[0].text;
       return res.json({ reply: text });
     } else {
-      // If Gemini returns an error structure, trigger fallback
       throw new Error("Gemini model not available");
     }
 
   } catch (error) {
-    // FALLBACK: Search Local Database if AI fails
     console.log("AI unavailable, switching to Local Smart Search...");
-    
     try {
       const keywords = prompt.toLowerCase();
       let foundMovies = [];
@@ -83,7 +72,6 @@ app.post("/api/chat", async (req, res) => {
       } else if (keywords.includes("drama")) {
         foundMovies = await Movie.find({ genre: "Drama" }).limit(3);
       } else {
-        // If no specific genre mentioned, pick random movies
         foundMovies = await Movie.aggregate([{ $sample: { size: 3 } }]);
       }
 
@@ -99,7 +87,6 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
-// Start Server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
